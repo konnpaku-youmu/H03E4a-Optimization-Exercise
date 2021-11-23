@@ -3,7 +3,7 @@ function ex5_sqp_chain()
 clc
 close all
 
-N = 10;
+N = 30;
 x0 = linspace(-1,1,N);
 %y0 = ones(1,N);
 %y0 = 1+0.2*cos(x0*pi/2);
@@ -39,6 +39,7 @@ function callback(x)
     plot(x(1:N), x(N+1:end),'bo');
     axis([-1.3 1.3 -0.1 2.1])
     drawnow
+    pause(0.2);
 end
 
 function V = ffun(xy)
@@ -46,7 +47,7 @@ function V = ffun(xy)
     x = xy(1:N);
     y = xy(N+1:end);
     
-    V = ???????
+    V = sum(y);
 end
 
 function h = hfun(xy)
@@ -56,7 +57,15 @@ function h = hfun(xy)
     
     r = 1.4*2/N;
     
-    h = ?????
+    h = zeros(N+3, 1);
+    for i=2:N
+        h(i-1) = (x(i)-x(i-1))^2 + (y(i)-y(i-1))^2 - r^2;
+    end
+
+    h(N) = x(1) + 1;
+    h(N+1) = x(N) - 1;
+    h(N+2) = y(1) - 1;
+    h(N+3) = y(N) - 1;
 end
 
 function g = gfun(xy)
@@ -64,5 +73,5 @@ function g = gfun(xy)
     x = xy(1:N);
     y = xy(N+1:end);
     
-    g = ?????????????
+    g = -0.6*x.^2 + 0.15 * x + 0.5 - y;
 end

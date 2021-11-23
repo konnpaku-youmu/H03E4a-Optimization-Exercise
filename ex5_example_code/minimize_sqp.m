@@ -101,7 +101,7 @@ function [x, x_iters, f_iters] = minimize_sqp( ffun, hfun, gfun, x0, callback )
         
         %%%%%%%%%%%%%%%%%%%% FILL THIS PART IN %%%%%%%%%%%%%%%%%%%%%%%%
         % find the search direction
-        [dk,~,qp_status,~,lambdas] = quadprog(B, J', J_g, -g, J_h, h,[],[],[],qpopts);
+        [dk,~,qp_status,~,lambdas] = quadprog(B, J', J_g, -g, J_h, -h,[],[],[],qpopts);
         lambda = lambdas.eqlin;
         mu     = lambdas.ineqlin;
     
@@ -130,8 +130,18 @@ function [x, x_iters, f_iters] = minimize_sqp( ffun, hfun, gfun, x0, callback )
         
         s = x - x_old;
         y = Lx - Lx_old;
+
+        theta_k = 1;
+        if((s'*y) >= 0.2 *(s'*B*s))
+            theta_k = 1;
+        else
+            theta_k = (0.8*s'*B*s) / ((s'*B*s) - s'*y);
+        end
         
-        B = B - ((B*s)*s'*B)/(s'*B*s) + (y*y')/(y'*s);
+        y_tilde = theta_k*y + (1-theta_k) * B * s;
+%         y_tilde = y;
+        
+        B = B - ((B*s)*s'*B)/(s'*B*s) + (y_tilde*y_tilde')/(y_tilde'*s);
         B = (B + B') / 2; % Symmetrize Hessian, only needed due to numerical inaccuracy, so that quadprog doesn't complain
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     end
